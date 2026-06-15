@@ -43,7 +43,7 @@ function fakeCodex(behavior = {}) {
 function makeDriver(behavior, env) {
   const { FakeCodex, calls } = fakeCodex(behavior);
   const driver = createSdkDriver({
-    CodexClass: FakeCodex,
+    getCodex: async () => FakeCodex,
     env: env ?? { PATH: "/usr/bin" },
     validate,
     strictOutputSchema,

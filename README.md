@@ -2,12 +2,21 @@
 
 Delegate **code review** and **adversarial review** to OpenAI **Codex** (a different model family) from inside Claude Code. The thesis: a model is a weak judge of its own output — an independent model from another family catches error classes the generator misses in itself. Review runs on your **ChatGPT subscription** (cached `codex login`), never on an API key.
 
-> **Status:** `0.1.0`, pre-release. The blocking transport spike **SP-1 passed** (2026-06-14) — `@openai/codex-sdk` runs on the ChatGPT subscription with structured output. See `docs/tech-spec.md` and `spike/sp-1/FINDINGS.md`. Feature code is in active development; the marketplace entry is not yet published.
+> **Status:** `0.1.0`, pre-release. Build complete (192 tests green; `claude plugin validate --strict` passes). The blocking transport spike **SP-1 passed** (2026-06-14) — `@openai/codex-sdk` runs on the ChatGPT subscription with structured output. The V-1 cross-model validation harness is built; its live run and the 1.0 gate decision remain a manual, quota-gated activity. See `docs/tech-spec.md`, `spike/sp-1/FINDINGS.md`, and `spike/v-1/README.md`. The marketplace entry is not yet published.
 
-## What it does
+## Commands
 
-- **`/codex-gate:review`** — correctness / quality / security review of the resolved scope.
-- **`/codex-gate:adversarial-review`** — challenges a design or document: assumptions, trade-offs, failure modes (no Git required — works on a standalone file or pasted text).
+All commands live under the `/codex-gate:` namespace:
+
+- **`/codex-gate:review`** — correctness / quality / security review of the resolved scope. Add `--background` to run a long review (large repo or branch) as a detached job and poll it.
+- **`/codex-gate:adversarial-review`** — challenges a design or document: assumptions, trade-offs, failure modes (no Git required — works on a standalone file or pasted text). Accepts `--focus <text>`.
+- **`/codex-gate:setup`** — probe the Codex login (distinguishes *not authenticated* from *rate-limited*), pre-install the pinned SDK, and toggle the stop-gate.
+- **`/codex-gate:status [jobId]`** — inspect background review job(s).
+- **`/codex-gate:result <jobId>`** — fetch a completed background job's structured result.
+- **`/codex-gate:cancel <jobId>`** — cancel a running background job.
+
+Beyond the slash commands:
+
 - **Stop review-gate** (opt-in) — a bounded, provably-terminating review→fix loop when a turn ends.
 - **`codex-reviewer` subagent** — an isolated-context surface an orchestrator can call after each story.
 

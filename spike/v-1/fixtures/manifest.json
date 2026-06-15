@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "description": "V-1 seeded-defect fixtures. Each entry records the ground-truth set of defect CLASSES (namespace:slug) intentionally seeded in the file. Classes are the labelled truth used by score.mjs. A reviewer 'finds' a class when any of its findings normalize to that class (see classMap in run-v1.mjs). f09 is a defect-free control (FPs only).",
+  "classTaxonomy": [
+    "correctness:off-by-one",
+    "correctness:float-money",
+    "correctness:logic",
+    "correctness:mutation",
+    "security:sqli",
+    "security:timing",
+    "security:weak-crypto",
+    "security:path-traversal",
+    "concurrency:race",
+    "data-integrity:unvalidated",
+    "performance:n-plus-one",
+    "error-handling:unhandled",
+    "resource:leak",
+    "api-misuse:shallow-copy"
+  ],
+  "fixtures": [
+    {
+      "id": "f01-cart",
+      "file": "f01-cart.js",
+      "truthClasses": ["correctness:off-by-one", "security:sqli"]
+    },
+    {
+      "id": "f02-counter",
+      "file": "f02-counter.js",
+      "truthClasses": ["concurrency:race"]
+    },
+    {
+      "id": "f03-parse-amount",
+      "file": "f03-parse-amount.js",
+      "truthClasses": ["data-integrity:unvalidated", "correctness:float-money"]
+    },
+    {
+      "id": "f04-auth-token",
+      "file": "f04-auth-token.js",
+      "truthClasses": ["security:weak-crypto", "security:timing"]
+    },
+    {
+      "id": "f05-pagination",
+      "file": "f05-pagination.js",
+      "truthClasses": ["correctness:off-by-one", "performance:n-plus-one"]
+    },
+    {
+      "id": "f06-file-read",
+      "file": "f06-file-read.js",
+      "truthClasses": ["security:path-traversal", "error-handling:unhandled"]
+    },
+    {
+      "id": "f07-retry",
+      "file": "f07-retry.js",
+      "truthClasses": ["correctness:logic", "resource:leak"]
+    },
+    {
+      "id": "f08-merge",
+      "file": "f08-merge.js",
+      "truthClasses": ["correctness:mutation", "api-misuse:shallow-copy"]
+    },
+    {
+      "id": "f09-clean",
+      "file": "f09-clean.js",
+      "truthClasses": []
+    }
+  ]
+}

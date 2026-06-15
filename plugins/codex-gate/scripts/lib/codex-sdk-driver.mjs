@@ -71,13 +71,13 @@ export function classifyError(err) {
  * Create the SDK-backed Codex driver (sole transport). Dependencies are injected
  * so the orchestration is unit-testable without spawning a real Codex.
  * @param {{
- *   CodexClass: new (opts?: any) => any,
+ *   getCodex: () => any | Promise<any>,
  *   env?: Record<string, string|undefined>,
  *   validate: (kind: any, payload: unknown) => { ok: boolean, value?: unknown, errors?: unknown },
  *   strictOutputSchema: (kind: any) => object,
  * }} deps
  */
-export function createSdkDriver({ CodexClass, env = process.env, validate, strictOutputSchema }) {
+export function createSdkDriver({ getCodex, env = process.env, validate, strictOutputSchema }) {
   return {
     /**
      * @param {{ kind: "review"|"adversarial", prompt: string, workingDirectory: string, skipGitRepoCheck?: boolean, model?: string }} req
@@ -86,7 +86,8 @@ export function createSdkDriver({ CodexClass, env = process.env, validate, stric
     async review({ kind, prompt, workingDirectory, skipGitRepoCheck = false, model }) {
       let turn;
       try {
-        const codex = new CodexClass({ env: stripApiKeys(env) });
+        const Codex = await getCodex(); // lazy: SDK lives in ${CLAUDE_PLUGIN_DATA} (§5.4)
+        const codex = new Codex({ env: stripApiKeys(env) });
         const thread = codex.startThread({
           sandboxMode: "read-only",
           approvalPolicy: "never",
