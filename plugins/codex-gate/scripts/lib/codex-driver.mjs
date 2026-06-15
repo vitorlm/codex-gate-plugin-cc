@@ -1,5 +1,5 @@
 import { createSdkDriver } from "./codex-sdk-driver.mjs";
-import { strictOutputSchema, validate } from "./review-schema.mjs";
+import { strictOutputSchema, validate as validateSchema } from "./review-schema.mjs";
 import { loadCodex } from "./sdk-load.mjs";
 
 /**
@@ -15,5 +15,7 @@ export function createDriver(overrides = {}) {
   const dir = dataDir ?? process.env.CLAUDE_PLUGIN_DATA ?? null;
   const getCodex =
     overrides.getCodex ?? (CodexClass ? async () => CodexClass : () => loadCodex(dir));
+  const validate = (/** @type {any} */ kind, /** @type {unknown} */ payload) =>
+    validateSchema(kind, payload, { dataDir: dir });
   return createSdkDriver({ getCodex, validate, strictOutputSchema, ...rest });
 }

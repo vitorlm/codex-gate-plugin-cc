@@ -9,11 +9,10 @@ import { loadState, postReview, preReview, saveState, stopHookOutput } from "./l
 import { resolveModel } from "./lib/models.mjs";
 import { composePrompt } from "./lib/prompts.mjs";
 import { resolveScope } from "./lib/scope.mjs";
-import { ensureSdk } from "./lib/sdk-install.mjs";
+import { ensureDeps, PINNED_SPECS } from "./lib/sdk-install.mjs";
 import { touched } from "./lib/session-tracker.mjs";
 
 const execFileAsync = promisify(execFile);
-const PINNED_SDK = "@openai/codex-sdk@0.139.0";
 
 const env = process.env;
 const DATA_DIR = env.CLAUDE_PLUGIN_DATA ?? null;
@@ -79,15 +78,15 @@ async function main() {
     return emit(stopHookOutput(pre.action === "open" ? "open" : "allow", pre.reason ?? ""));
   }
 
-  // Ensure the pinned SDK exists (lazy, first review).
-  const sdk = await ensureSdk(DATA_DIR, {
+  // Ensure the pinned runtime deps (SDK + ajv) exist (lazy, first review).
+  const deps = await ensureDeps(DATA_DIR, {
     install: async () => {
-      await execFileAsync("npm", ["install", "--prefix", DATA_DIR, "--no-save", PINNED_SDK], {
+      await execFileAsync("npm", ["install", "--prefix", DATA_DIR, "--no-save", ...PINNED_SPECS], {
         timeout: 120_000,
       });
     },
   });
-  if (!sdk.ok) return handleUnavailable(sessionId, state, sdk.error);
+  if (!deps.ok) return handleUnavailable(sessionId, state, deps.error);
 
   const prompt = composePrompt({ kind: "review", scope: realScope });
   const result = await createDriver().review({

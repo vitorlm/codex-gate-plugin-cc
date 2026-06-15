@@ -2,7 +2,7 @@ import { rmSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { cancelJob, listJobs } from "./lib/jobs.mjs";
-import { sdkInstalled } from "./lib/sdk-install.mjs";
+import { depsInstalled } from "./lib/sdk-install.mjs";
 import { clear } from "./lib/session-tracker.mjs";
 import { workspaceStateDir } from "./lib/state.mjs";
 import { readJson, writeJsonAtomic } from "./lib/statelock.mjs";
@@ -30,8 +30,8 @@ async function readStdin() {
 }
 
 /**
- * SessionStart: record session id + data path + SDK-presence flag (a stat only —
- * never an npm install; §5.4). SessionEnd: clean up this session's state.
+ * SessionStart: record session id + data path + runtime-deps presence flag (a stat
+ * only — never an npm install; §5.4). SessionEnd: clean up this session's state.
  */
 /** @param {string} event */
 async function main(event) {
@@ -48,7 +48,7 @@ async function main(event) {
         ...prev,
         sessionId,
         dataPath: DATA_DIR,
-        sdkInstalled: sdkInstalled(DATA_DIR),
+        depsInstalled: depsInstalled(DATA_DIR),
       });
     } else if (event === "SessionEnd") {
       clear(sessionId, { dir: sessionsDir }); // touched-files list

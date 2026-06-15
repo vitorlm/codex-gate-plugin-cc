@@ -6,6 +6,29 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Fixed
+- **Distributed-install crash (dependency resolution).** `scripts/lib/review-schema.mjs` used a
+  static `import { Ajv } from "ajv"`, but the lazy installer only placed `@openai/codex-sdk` into
+  `${CLAUDE_PLUGIN_DATA}/node_modules`. In a distributed (non-dev) install `ajv` was unresolvable,
+  so the companion crashed at module load with `ERR_MODULE_NOT_FOUND` (the `/codex-gate:setup`
+  probe failed for exactly this reason). Fix: `ajv` is now installed lazily into
+  `${CLAUDE_PLUGIN_DATA}` **alongside the SDK** and loaded via dynamic `import()` from the data dir
+  (with a dev bare-specifier fallback), the same treatment `sdk-load.mjs` already gave the SDK.
+
+### Changed
+- `scripts/lib/sdk-load.mjs`: factored a generic `loadDep(dataDir, pkgName)`; added
+  `loadAjv(dataDir)` (`loadCodex` now delegates to it).
+- `scripts/lib/review-schema.mjs`: `validate` is now `async validate(kind, payload, { dataDir })`
+  and loads ajv lazily; compiled validators are memoized per `dataDir`. `dropNulls` and
+  `strictOutputSchema` stay synchronous; the return contract is unchanged.
+- `scripts/lib/sdk-install.mjs`: `sdkInstalled`/`ensureSdk` generalized to
+  `depsInstalled`/`ensureDeps`, which check/install **both** pinned deps
+  (`@openai/codex-sdk@0.139.0` and `ajv@8.17.1`, exported as `PINNED_SPECS`).
+- Async ripple: `codex-sdk-driver.mjs` awaits the injected `validate`; `codex-driver.mjs` binds
+  `validate` to the driver's `dataDir`; install call sites in `codex-companion.mjs` and
+  `stop-review-gate-hook.mjs`, plus the SessionStart presence flag in
+  `session-lifecycle-hook.mjs`, now reference both deps.
+
 ## [0.1.0] - 2026-06-15
 
 Initial pre-release. Build steps 2–13 complete (192 tests green; `claude plugin validate --strict` passes). The V-1 cross-model validation harness is built; its live run and the 1.0 gate decision remain a manual, quota-gated activity.

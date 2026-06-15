@@ -14,14 +14,13 @@ import { composePrompt } from "./lib/prompts.mjs";
 import { checkQuota, rateLimitCooldown, recordRateLimit, recordReview } from "./lib/quota.mjs";
 import { renderAdversarial, renderError, renderReview } from "./lib/render.mjs";
 import { resolveScope } from "./lib/scope.mjs";
-import { ensureSdk } from "./lib/sdk-install.mjs";
+import { ensureDeps, PINNED_SPECS } from "./lib/sdk-install.mjs";
 import { touched } from "./lib/session-tracker.mjs";
 import { gateConfigFromEnv, runSetup } from "./lib/setup.mjs";
 import { workspaceStateDir } from "./lib/state.mjs";
 import { readJson, writeJsonAtomic } from "./lib/statelock.mjs";
 
 const execFileAsync = promisify(execFile);
-const PINNED_SDK = "@openai/codex-sdk@0.139.0";
 
 const SESSION_ID = process.env.CLAUDE_SESSION_ID ?? "manual";
 const DATA_DIR = process.env.CLAUDE_PLUGIN_DATA ?? null;
@@ -345,11 +344,13 @@ export async function setupCommand() {
         model: resolveModel(process.env.CODEX_GATE_MODEL ?? null),
       }),
     ensureSdk: () =>
-      ensureSdk(dataDir, {
+      ensureDeps(dataDir, {
         install: async () => {
-          await execFileAsync("npm", ["install", "--prefix", dataDir, "--no-save", PINNED_SDK], {
-            timeout: 120_000,
-          });
+          await execFileAsync(
+            "npm",
+            ["install", "--prefix", dataDir, "--no-save", ...PINNED_SPECS],
+            { timeout: 120_000 },
+          );
         },
       }),
     readAuthFile: authFileExists,

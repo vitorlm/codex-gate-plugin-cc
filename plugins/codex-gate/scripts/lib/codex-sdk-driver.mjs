@@ -73,7 +73,7 @@ export function classifyError(err) {
  * @param {{
  *   getCodex: () => any | Promise<any>,
  *   env?: Record<string, string|undefined>,
- *   validate: (kind: any, payload: unknown) => { ok: boolean, value?: unknown, errors?: unknown },
+ *   validate: (kind: any, payload: unknown) => Promise<{ ok: boolean, value?: unknown, errors?: unknown }>,
  *   strictOutputSchema: (kind: any) => object,
  * }} deps
  */
@@ -113,7 +113,7 @@ export function createSdkDriver({ getCodex, env = process.env, validate, strictO
         };
       }
 
-      const result = validate(kind, parsed);
+      const result = await validate(kind, parsed);
       if (!result.ok) {
         return {
           ok: false,
