@@ -130,6 +130,11 @@ test("gateConfigFromEnv maps env knobs to a structured view (defaults off)", () 
   assert.equal(c.stopReviewGate, false);
   assert.equal(c.maxReviewsPerDay, 0);
   assert.equal(c.onUnavailable, "allow");
+  assert.equal(c.reviewTimeoutMs, 300_000);
+});
+
+test("gateConfigFromEnv reads a custom review timeout from env", () => {
+  assert.equal(gateConfigFromEnv({ CODEX_GATE_TIMEOUT_MS: "120000" }).reviewTimeoutMs, 120_000);
 });
 
 test("gateConfigFromEnv reads enabled gate + cap from env", () => {

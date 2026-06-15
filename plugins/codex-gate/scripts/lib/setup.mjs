@@ -9,6 +9,7 @@ import { renderError } from "./render.mjs";
  *   maxIterations: number,
  *   severityThreshold: string,
  *   reviewModel: string|null,
+ *   reviewTimeoutMs: number,
  * }} GateConfig
  */
 
@@ -29,6 +30,7 @@ export function gateConfigFromEnv(env = process.env) {
     maxIterations: Number(env.CODEX_GATE_MAX_ITER ?? 3),
     severityThreshold: env.CODEX_GATE_SEVERITY ?? "blocker",
     reviewModel: env.CODEX_GATE_MODEL ?? null,
+    reviewTimeoutMs: Number(env.CODEX_GATE_TIMEOUT_MS) || 300_000,
   };
 }
 
@@ -42,6 +44,7 @@ function renderGateConfig(c) {
     `  maxReviewsPerDay:   ${c.maxReviewsPerDay === 0 ? "0 (no cap)" : c.maxReviewsPerDay}`,
     `  maxIterations:      ${c.maxIterations}`,
     `  severityThreshold:  ${c.severityThreshold}`,
+    `  reviewTimeout:      ${Math.round(c.reviewTimeoutMs / 1000)}s`,
   ];
   return lines.join("\n");
 }

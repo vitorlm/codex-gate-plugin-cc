@@ -6,6 +6,28 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-06-15
+
+### Added
+- **Live review visibility (streaming).** The Codex driver now consumes the turn via the SDK's
+  `runStreamed()` instead of the opaque blocking `run()`, and emits a human-readable progress line
+  per `ThreadEvent` (commands Codex runs, reasoning, web searches, plan/todo updates, completion +
+  token usage) plus a periodic **heartbeat** while it works silently. Output goes to **stderr**, so
+  a backgrounded shell (`2>&1`) shows what Codex is doing in real time — and it costs **zero** Claude
+  tokens (process output, not model context). The structured `outputSchema` verdict is unchanged
+  (reconstructed from the final `agent_message`).
+- **Review timeout (no more zombie shells).** A single review turn is now bounded by an
+  `AbortSignal` armed with `CODEX_GATE_TIMEOUT_MS` (default `300000` / 5 min, configurable via
+  `userConfig.reviewTimeoutMs`). A hung turn returns a clean `TIMEOUT` envelope with remediation
+  instead of running indefinitely. `gateConfigFromEnv`/`/codex-gate:setup` now report the effective
+  `reviewTimeout`.
+
+### Changed
+- `scripts/lib/codex-sdk-driver.mjs`: switched to `runStreamed`; added pure, exported `formatEvent`
+  and `consumeEvents` helpers; injectable `onProgress`/`timers`/`timeoutMs`/`heartbeatMs` keep the
+  orchestration deterministically unit-testable. A `turn.failed`/stream `error` event is now raised
+  and mapped to an envelope rather than silently treated as a completed turn.
+
 ## [0.1.1] - 2026-06-15
 
 ### Fixed
@@ -123,5 +145,7 @@ Initial pre-release. Build steps 2–13 complete (192 tests green; `claude plugi
 - **OD-5:** `@openai/codex-sdk` is the sole transport (bundled, pinned binary). The
   `codex exec` fallback and version-compat layer are dropped.
 
-[Unreleased]: https://github.com/vitorlm/codex-gate-plugin-cc/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/vitorlm/codex-gate-plugin-cc/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/vitorlm/codex-gate-plugin-cc/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/vitorlm/codex-gate-plugin-cc/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/vitorlm/codex-gate-plugin-cc/releases/tag/v0.1.0

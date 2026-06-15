@@ -54,6 +54,9 @@ Set via the plugin's `userConfig` (see `plugins/codex-gate/.claude-plugin/plugin
 | `maxIterations` | `3` | Stop-gate max iterations. |
 | `maxReviewsPerDay` | `0` | `0` = no cap. Set `>0` for a daily automated-review ceiling. |
 | `severityThreshold` | `"blocker"` | Stop-gate block threshold. |
+| `reviewTimeoutMs` | `300000` | Hard ceiling (ms) on a single Codex review turn; a hung turn becomes a clean `TIMEOUT`. |
+
+While a review runs, the companion streams Codex's live activity (commands it runs, reasoning, web searches) to **stderr** plus a periodic heartbeat — so you can see what Codex is doing instead of staring at a silent shell. Redirect with `2>&1` to surface it in a backgrounded shell. This costs **zero** Claude tokens (it is process output, not model context).
 
 ## Trust & ToS posture — read this
 

@@ -1,6 +1,6 @@
 {
   "name": "codex-gate",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cross-model code review for Claude Code: review, adversarial review, and a converging stop-gate, powered by the Codex CLI on your ChatGPT subscription.",
   "author": { "name": "Vitor Mendonça" },
   "homepage": "https://github.com/vitorlm/codex-gate-plugin-cc",
@@ -54,6 +54,13 @@
       "title": "Stop-gate block threshold",
       "description": "blocker | major | minor | info",
       "default": "blocker"
+    },
+    "reviewTimeoutMs": {
+      "type": "number",
+      "title": "Review timeout (ms)",
+      "description": "Hard ceiling on a single Codex review turn; a hung turn becomes a clean TIMEOUT instead of a stuck shell. Default 300000 (5 min).",
+      "default": 300000,
+      "min": 30000
     }
   }
 }

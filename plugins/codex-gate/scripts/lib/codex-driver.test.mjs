@@ -10,17 +10,25 @@ test("createDriver returns a driver exposing review()", () => {
 test("createDriver wires the default validate + strictOutputSchema (CodexClass overridable)", async () => {
   const VALID = { verdict: "approve", summary: "ok", findings: [], next_steps: [] };
   let sentSchema = null;
+  async function* events(finalResponse) {
+    yield {
+      type: "item.completed",
+      item: { id: "a1", type: "agent_message", text: finalResponse },
+    };
+    yield { type: "turn.completed", usage: null };
+  }
   class FakeCodex {
     startThread() {
       return {
-        async run(_input, turnOptions) {
+        async runStreamed(_input, turnOptions) {
           sentSchema = turnOptions.outputSchema;
-          return { items: [], finalResponse: JSON.stringify(VALID), usage: null };
+          return { events: events(JSON.stringify(VALID)) };
         },
       };
     }
   }
-  const driver = createDriver({ CodexClass: FakeCodex });
+  // Disable heartbeat/timeout real timers in this integration test.
+  const driver = createDriver({ CodexClass: FakeCodex, heartbeatMs: 0, onProgress: () => {} });
   const result = await driver.review({ kind: "review", prompt: "p", workingDirectory: "/repo" });
   // Default strictOutputSchema was wired in (the review strict schema has a closed category enum).
   assert.equal(

@@ -1,6 +1,6 @@
 {
   "name": "codex-plugin-cc",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "Cross-model code review plugin for Claude Code, powered by the Codex CLI on a ChatGPT subscription.",
