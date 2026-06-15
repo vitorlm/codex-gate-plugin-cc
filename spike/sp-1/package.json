@@ -1,0 +1,14 @@
+{
+  "name": "codex-plugin-sp1-spike",
+  "private": true,
+  "type": "module",
+  "description": "SP-1 blocking spike: validate @openai/codex-sdk on ChatGPT subscription + structured output + category-id stability + token observability + strict-schema viability.",
+  "scripts": {
+    "sdk": "node run-sdk.mjs",
+    "exec": "node run-exec.mjs"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "0.139.0",
+    "ajv": "8.17.1"
+  }
+}

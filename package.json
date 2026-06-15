@@ -1,0 +1,29 @@
+{
+  "name": "codex-plugin-cc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cross-model code review plugin for Claude Code, powered by the Codex CLI on a ChatGPT subscription.",
+  "author": { "name": "Vitor Mendonça" },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/vitorlm/codex-plugin-cc",
+  "repository": { "type": "git", "url": "https://github.com/vitorlm/codex-plugin-cc.git" },
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "tsc -p tsconfig.scripts.json",
+    "validate": "claude plugin validate ./plugins/codex-gate --strict",
+    "check": "npm run lint && npm run typecheck && npm test && npm run validate"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "0.139.0",
+    "ajv": "8.17.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.0",
+    "@types/node": "25.9.3",
+    "typescript": "6.0.3"
+  }
+}

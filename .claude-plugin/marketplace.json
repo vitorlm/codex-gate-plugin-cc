@@ -1,0 +1,12 @@
+{
+  "name": "vitorlm-codex-gate",
+  "description": "Cross-model code review for Claude Code, powered by the Codex CLI on a ChatGPT subscription.",
+  "owner": { "name": "Vitor Mendonça" },
+  "plugins": [
+    {
+      "name": "codex-gate",
+      "source": "./plugins/codex-gate",
+      "description": "Cross-model code review for Claude Code."
+    }
+  ]
+}

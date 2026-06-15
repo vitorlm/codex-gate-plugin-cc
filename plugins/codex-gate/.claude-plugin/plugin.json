@@ -1,0 +1,59 @@
+{
+  "name": "codex-gate",
+  "version": "0.1.0",
+  "description": "Cross-model code review for Claude Code: review, adversarial review, and a converging stop-gate, powered by the Codex CLI on your ChatGPT subscription.",
+  "author": { "name": "Vitor Mendonça" },
+  "homepage": "https://github.com/vitorlm/codex-gate-plugin-cc",
+  "repository": "https://github.com/vitorlm/codex-gate-plugin-cc",
+  "license": "Apache-2.0",
+  "keywords": ["codex", "code-review", "openai", "adversarial-review", "cross-model", "stop-gate"],
+  "userConfig": {
+    "stopReviewGate": {
+      "type": "boolean",
+      "title": "Enable stop review-gate",
+      "description": "Run a converging Codex review when a turn ends.",
+      "default": false
+    },
+    "stopGateOnUnavailable": {
+      "type": "string",
+      "title": "Stop-gate behavior when Codex is unavailable",
+      "description": "allow (warn, NOT REVIEWED) | block (fail-closed)",
+      "default": "allow"
+    },
+    "notReviewedStreakLimit": {
+      "type": "number",
+      "title": "Escalate after N consecutive NOT REVIEWED turns",
+      "description": "After this many consecutive unreviewed turns, escalate the warning with an actionable remediation.",
+      "default": 3,
+      "min": 1,
+      "max": 20
+    },
+    "reviewModel": {
+      "type": "string",
+      "title": "Review model",
+      "description": "Codex model used for review and adversarial review (e.g. gpt-5.5).",
+      "default": "gpt-5.5"
+    },
+    "maxIterations": {
+      "type": "number",
+      "title": "Stop-gate max iterations",
+      "description": "Hard ceiling on stop-gate review->fix rounds before the loop opens and hands to a human.",
+      "default": 3,
+      "min": 1,
+      "max": 10
+    },
+    "maxReviewsPerDay": {
+      "type": "number",
+      "title": "Daily automated-review cap (quota guard)",
+      "description": "0 = no cap (default). Set >0 to enforce a daily ceiling on automated reviews.",
+      "default": 0,
+      "min": 0
+    },
+    "severityThreshold": {
+      "type": "string",
+      "title": "Stop-gate block threshold",
+      "description": "blocker | major | minor | info",
+      "default": "blocker"
+    }
+  }
+}

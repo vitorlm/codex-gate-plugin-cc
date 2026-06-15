@@ -1,0 +1,14 @@
+node_modules/
+*.log
+.DS_Store
+
+# Spike evidence is kept, but its installed deps are not.
+spike/**/node_modules/
+
+# Local Claude plugin data (runtime SDK install, state) is never committed.
+.claude-plugin-data/
+
+# Local tooling / session config — not part of the published plugin.
+_bmad/
+_bmad-output/
+.claude/

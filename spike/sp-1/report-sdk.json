@@ -1,0 +1,346 @@
+{
+  "meta": {
+    "strippedEnv": [
+      "OPENAI_API_KEY"
+    ],
+    "runs": 3
+  },
+  "freeCategory": [
+    {
+      "label": "free#1",
+      "ms": 36261,
+      "threadId": "019ec8e0-d819-7ab0-bd41-b6e5a2becef7",
+      "usage": {
+        "input_tokens": 94050,
+        "cached_input_tokens": 48384,
+        "output_tokens": 793,
+        "reasoning_output_tokens": 0
+      },
+      "finalResponseLen": 3284,
+      "itemTypes": [
+        "agent_message",
+        "command_execution",
+        "agent_message"
+      ],
+      "parseOk": true,
+      "salvaged": false,
+      "strictValid": true,
+      "strictErrors": null,
+      "payload": {
+        "verdict": "request_changes",
+        "summary": "The file contains a critical SQL-injection vulnerability, an off-by-one failure in discount calculation, a lost-update race during checkout, and missing validation that can corrupt account balances and calculated totals.",
+        "findings": [
+          {
+            "category": "security",
+            "severity": "blocker",
+            "file": "fixtures/cart.js",
+            "line_start": 14,
+            "line_end": 17,
+            "title": "User-controlled values are interpolated into SQL statements",
+            "detail": "Both queries construct SQL by embedding `userId` directly, and the update also embeds the computed amount. An attacker can alter query structure through a crafted identifier or non-numeric cart value, enabling unauthorized reads or balance modification.",
+            "suggestion": "Use parameterized queries for every value, including `userId` and the debit amount, and validate monetary inputs before executing SQL."
+          },
+          {
+            "category": "concurrency",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 14,
+            "line_end": 17,
+            "title": "Checkout uses a non-atomic read-modify-write sequence",
+            "detail": "Concurrent checkouts can read the same balance and then each write a balance derived from that stale value. The later update overwrites the earlier debit, causing lost charges and an incorrect stored balance.",
+            "suggestion": "Perform an atomic conditional update such as `UPDATE ... SET balance = balance - ? WHERE id = ? AND balance >= ?`, then verify that exactly one row was affected. Alternatively, use a transaction with an appropriate row lock."
+          },
+          {
+            "category": "data-integrity",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 15,
+            "line_end": 17,
+            "title": "Checkout does not enforce sufficient funds",
+            "detail": "The code subtracts `cart.total` without checking whether the user has enough balance. A checkout can therefore persist a negative balance unless the database independently prevents it.",
+            "suggestion": "Enforce the balance condition atomically in the update and add a database constraint if negative balances are invalid."
+          },
+          {
+            "category": "correctness",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 7,
+            "line_end": 8,
+            "title": "Item loop reads one element past the end of the array",
+            "detail": "The `i <= items.length` condition executes once with `i === items.length`. At that point `items[i]` is `undefined`, so accessing `.price` throws for every normal array, including an empty one.",
+            "suggestion": "Change the loop condition to `i < items.length`."
+          },
+          {
+            "category": "data-integrity",
+            "severity": "minor",
+            "file": "fixtures/cart.js",
+            "line_start": 5,
+            "line_end": 10,
+            "title": "Discount percentage and item prices are not validated",
+            "detail": "Negative percentages increase the total, percentages above 100 produce negative totals, and non-finite or non-numeric values can propagate `NaN` or otherwise invalid amounts.",
+            "suggestion": "Require finite numeric, non-negative item prices and constrain `percent` to the accepted range, typically 0 through 100."
+          }
+        ],
+        "next_steps": [
+          "Replace interpolated SQL with parameterized statements.",
+          "Make the balance debit atomic and conditional on sufficient funds.",
+          "Correct the loop bound and add tests for empty, single-item, and multi-item carts.",
+          "Add validation tests for invalid prices, discount percentages, and checkout totals.",
+          "Add a concurrent-checkout test that verifies both debits are preserved."
+        ]
+      }
+    },
+    {
+      "label": "free#2",
+      "ms": 41382,
+      "threadId": "019ec8e1-65e1-75a1-a06f-4f2e237a76ed",
+      "usage": {
+        "input_tokens": 94337,
+        "cached_input_tokens": 48384,
+        "output_tokens": 638,
+        "reasoning_output_tokens": 0
+      },
+      "finalResponseLen": 2592,
+      "itemTypes": [
+        "agent_message",
+        "command_execution",
+        "agent_message"
+      ],
+      "parseOk": true,
+      "salvaged": false,
+      "strictValid": true,
+      "strictErrors": null,
+      "payload": {
+        "verdict": "request_changes",
+        "summary": "The file contains four defects that can cause runtime failure, SQL injection, lost balance updates, and unauthorized balance manipulation.",
+        "findings": [
+          {
+            "category": "security",
+            "severity": "blocker",
+            "file": "fixtures/cart.js",
+            "line_start": 14,
+            "line_end": 17,
+            "title": "User-controlled ID is interpolated into SQL statements",
+            "detail": "`userId` is inserted directly into both the SELECT and UPDATE queries. A crafted value can alter the query predicates or inject additional SQL, potentially exposing or modifying arbitrary user records.",
+            "suggestion": "Use parameterized queries for every occurrence of `userId`, including both the SELECT and UPDATE statements."
+          },
+          {
+            "category": "concurrency",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 14,
+            "line_end": 18,
+            "title": "Balance update is vulnerable to lost updates",
+            "detail": "Checkout reads the balance and later writes a newly calculated absolute value without a transaction or atomic update. Concurrent checkouts can read the same balance and overwrite each other's deductions, leaving the account with an incorrect balance.",
+            "suggestion": "Perform an atomic parameterized update such as `SET balance = balance - ?`, optionally inside a transaction with an invariant check."
+          },
+          {
+            "category": "data-integrity",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 17,
+            "line_end": 17,
+            "title": "Unvalidated cart total directly controls the balance adjustment",
+            "detail": "The function trusts `cart.total` without verifying that it is finite, nonnegative, or derived from authoritative product data. A negative total increases the user's balance, while a fabricated total can produce an incorrect charge.",
+            "suggestion": "Recalculate the total from server-controlled cart and pricing data, then reject non-finite or negative values before updating the balance."
+          },
+          {
+            "category": "correctness",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 7,
+            "line_end": 8,
+            "title": "Discount calculation reads past the end of the items array",
+            "detail": "The loop condition uses `i <= items.length`, so the final iteration accesses `items[items.length]`, which is `undefined`. Reading `.price` then throws a TypeError for every array input.",
+            "suggestion": "Change the loop condition to `i < items.length`."
+          }
+        ],
+        "next_steps": [
+          "Parameterize both database queries.",
+          "Make the balance deduction atomic and enforce transaction-level invariants.",
+          "Calculate and validate checkout totals using authoritative server-side data.",
+          "Fix the array loop bound and add tests for empty, single-item, and multi-item carts plus concurrent checkouts."
+        ]
+      }
+    },
+    {
+      "label": "free#3",
+      "ms": 38864,
+      "threadId": "019ec8e2-079d-7851-9ee8-b89c7b9f4c15",
+      "usage": {
+        "input_tokens": 94177,
+        "cached_input_tokens": 48384,
+        "output_tokens": 762,
+        "reasoning_output_tokens": 0
+      },
+      "finalResponseLen": 3161,
+      "itemTypes": [
+        "agent_message",
+        "command_execution",
+        "agent_message"
+      ],
+      "parseOk": true,
+      "salvaged": false,
+      "strictValid": true,
+      "strictErrors": null,
+      "payload": {
+        "verdict": "request_changes",
+        "summary": "The file contains correctness, SQL injection, concurrency, and balance-integrity defects that can crash discount calculation or corrupt user balances.",
+        "findings": [
+          {
+            "category": "correctness",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 7,
+            "line_end": 8,
+            "title": "Loop reads beyond the end of the items array",
+            "detail": "The condition `i <= items.length` executes once with `i === items.length`. At that index `items[i]` is undefined, so accessing `.price` throws for every normally formed array, including an empty array.",
+            "suggestion": "Change the condition to `i < items.length` and validate that item prices are finite numbers."
+          },
+          {
+            "category": "security",
+            "severity": "blocker",
+            "file": "fixtures/cart.js",
+            "line_start": 14,
+            "line_end": 17,
+            "title": "User-controlled ID is interpolated into SQL statements",
+            "detail": "`userId` is embedded directly in both the SELECT and UPDATE queries. A crafted value can alter either statement, exposing or modifying arbitrary database data.",
+            "suggestion": "Use parameterized queries for both statements and pass `userId` as a bound parameter."
+          },
+          {
+            "category": "concurrency",
+            "severity": "blocker",
+            "file": "fixtures/cart.js",
+            "line_start": 14,
+            "line_end": 17,
+            "title": "Read-modify-write balance update loses concurrent checkouts",
+            "detail": "Two checkouts can read the same balance and then independently write derived balances. The later update overwrites the earlier debit, allowing one purchase to be omitted from the stored balance.",
+            "suggestion": "Perform an atomic parameterized debit such as `UPDATE ... SET balance = balance - ?`, optionally with a conditional balance check, and execute the checkout operation within an appropriate transaction."
+          },
+          {
+            "category": "data-integrity",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 17,
+            "line_end": 17,
+            "title": "Checkout does not validate the charge amount",
+            "detail": "`cart.total` is used without checking that it is a finite, non-negative monetary amount. A negative total credits the account, while NaN or infinite values can generate invalid SQL or corrupt the balance.",
+            "suggestion": "Validate the charge using an integer minor-unit representation or a fixed-precision decimal type before issuing any database operation."
+          },
+          {
+            "category": "data-integrity",
+            "severity": "major",
+            "file": "fixtures/cart.js",
+            "line_start": 17,
+            "line_end": 17,
+            "title": "Checkout permits balances to fall below the allowed minimum",
+            "detail": "The update subtracts the charge without enforcing sufficient funds. Unless negative balances are an explicit invariant, any charge larger than the current balance leaves invalid account state.",
+            "suggestion": "Enforce the invariant atomically in the update, for example with `WHERE id = ? AND balance >= ?`, and verify that exactly one row was updated before reporting success."
+          }
+        ],
+        "next_steps": [
+          "Fix the array loop boundary and add empty-array and multi-item discount tests.",
+          "Parameterize all SQL and add injection regression tests.",
+          "Replace the balance read-modify-write sequence with an atomic transactional debit.",
+          "Validate monetary inputs and test concurrent checkout, negative totals, non-finite totals, and insufficient funds."
+        ]
+      }
+    }
+  ],
+  "enumCategory": {
+    "label": "enum",
+    "ms": 32679,
+    "threadId": "019ec8e2-9f73-7950-aed8-23d23cc1b4e2",
+    "usage": {
+      "input_tokens": 93778,
+      "cached_input_tokens": 48384,
+      "output_tokens": 775,
+      "reasoning_output_tokens": 0
+    },
+    "finalResponseLen": 3211,
+    "itemTypes": [
+      "agent_message",
+      "command_execution",
+      "agent_message"
+    ],
+    "parseOk": true,
+    "salvaged": false,
+    "strictValid": true,
+    "strictErrors": null,
+    "payload": {
+      "verdict": "request_changes",
+      "summary": "The file contains defects that make discount calculation fail, expose database queries to SQL injection, permit lost updates during concurrent checkouts, and allow invalid account balances.",
+      "findings": [
+        {
+          "category": "correctness",
+          "severity": "major",
+          "file": "fixtures/cart.js",
+          "line_start": 7,
+          "line_end": 8,
+          "title": "Loop reads past the end of the items array",
+          "detail": "The loop uses `i <= items.length`, so its final iteration accesses `items[items.length]`. That value is `undefined`, and reading `.price` throws a TypeError for every normal array, including an empty array.",
+          "suggestion": "Change the condition to `i < items.length` and validate that each item has a finite numeric price."
+        },
+        {
+          "category": "security",
+          "severity": "major",
+          "file": "fixtures/cart.js",
+          "line_start": 14,
+          "line_end": 17,
+          "title": "User-controlled values are interpolated into SQL",
+          "detail": "`userId` is embedded directly into both SQL statements. An attacker can alter the query syntax to read or update unintended records. Numeric interpolation of computed values also bypasses database parameter typing and validation.",
+          "suggestion": "Use parameterized queries for `userId` and all values supplied to the update."
+        },
+        {
+          "category": "concurrency",
+          "severity": "major",
+          "file": "fixtures/cart.js",
+          "line_start": 14,
+          "line_end": 17,
+          "title": "Checkout performs a non-atomic read-modify-write",
+          "detail": "Two concurrent checkouts can read the same balance, independently subtract their totals, and then overwrite each other. One purchase deduction can therefore be lost.",
+          "suggestion": "Perform an atomic parameterized update such as `balance = balance - ?`, preferably with a sufficient-balance predicate, and check the affected-row count inside a transaction when other checkout writes are involved."
+        },
+        {
+          "category": "data-integrity",
+          "severity": "major",
+          "file": "fixtures/cart.js",
+          "line_start": 15,
+          "line_end": 17,
+          "title": "Checkout can create invalid balances",
+          "detail": "The code neither verifies that the user exists nor checks that `cart.total` is finite, nonnegative, and no greater than the available balance. Missing users, malformed totals, negative totals, or insufficient funds can cause errors, credit an account, or produce an invalid or negative balance.",
+          "suggestion": "Validate the query result and cart total, then enforce sufficient funds atomically in the database with a conditional update and balance constraints."
+        },
+        {
+          "category": "data-integrity",
+          "severity": "minor",
+          "file": "fixtures/cart.js",
+          "line_start": 5,
+          "line_end": 10,
+          "title": "Discount percentage is not constrained",
+          "detail": "A non-finite percentage or a value outside the expected range can produce NaN, increase the total, or make the discounted total negative.",
+          "suggestion": "Require `percent` to be a finite number in the supported range, typically 0 through 100."
+        }
+      ],
+      "next_steps": [
+        "Fix the array bound and add discount input validation.",
+        "Replace SQL interpolation with parameterized statements.",
+        "Make balance deduction atomic and enforce user existence, valid totals, and sufficient funds at the database boundary.",
+        "Add tests for empty and populated carts, malicious user IDs, invalid totals and percentages, insufficient funds, and concurrent checkouts."
+      ]
+    }
+  },
+  "error": null,
+  "verdict": {
+    "SP1-Q1_sdk_subscription_outputSchema": true,
+    "SP1-Q3_token_usage_observable": true,
+    "SP1-Q4_strict_schema_viable": true,
+    "SP1-Q2_category_vocab_seen": [
+      "security",
+      "concurrency",
+      "data-integrity",
+      "correctness"
+    ],
+    "SP1-Q2_enum_constraint_valid": true
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "summary", "findings", "next_steps"],
+  "properties": {
+    "verdict": { "enum": ["approve", "request_changes", "comment"] },
+    "summary": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "severity", "file", "title", "detail"],
+        "properties": {
+          "category": {
+            "enum": [
+              "correctness",
+              "security",
+              "concurrency",
+              "performance",
+              "data-integrity",
+              "error-handling",
+              "api-misuse",
+              "style",
+              "other"
+            ]
+          },
+          "severity": { "enum": ["blocker", "major", "minor", "info"] },
+          "file": { "type": "string" },
+          "line_start": { "type": "integer", "minimum": 1 },
+          "line_end": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "detail": { "type": "string" },
+          "suggestion": { "type": "string" }
+        }
+      }
+    },
+    "next_steps": { "type": "array", "items": { "type": "string" } }
+  }
+}

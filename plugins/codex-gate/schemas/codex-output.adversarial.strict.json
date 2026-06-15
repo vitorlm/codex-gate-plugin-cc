@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "summary", "challenges", "next_steps"],
+  "properties": {
+    "verdict": { "enum": ["sound", "request_changes", "reconsider"] },
+    "summary": { "type": "string" },
+    "challenges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "severity",
+          "title",
+          "target",
+          "argument",
+          "failure_mode",
+          "file",
+          "recommendation"
+        ],
+        "properties": {
+          "severity": { "enum": ["blocker", "major", "minor", "info"] },
+          "title": { "type": "string" },
+          "target": { "type": ["string", "null"] },
+          "argument": { "type": "string" },
+          "failure_mode": { "type": ["string", "null"] },
+          "file": { "type": ["string", "null"] },
+          "recommendation": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "next_steps": { "type": "array", "items": { "type": "string" } }
+  }
+}
