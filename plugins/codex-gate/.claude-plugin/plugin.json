@@ -1,6 +1,6 @@
 {
   "name": "codex-gate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cross-model code review for Claude Code: review, adversarial review, and a converging stop-gate, powered by the Codex CLI on your ChatGPT subscription.",
   "author": { "name": "Vitor Mendonça" },
   "homepage": "https://github.com/vitorlm/codex-gate-plugin-cc",

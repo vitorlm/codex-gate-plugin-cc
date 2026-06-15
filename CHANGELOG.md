@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-15
+
 ### Fixed
 - **Distributed-install crash (dependency resolution).** `scripts/lib/review-schema.mjs` used a
   static `import { Ajv } from "ajv"`, but the lazy installer only placed `@openai/codex-sdk` into
